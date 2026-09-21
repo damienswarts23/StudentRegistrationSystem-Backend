@@ -1,18 +1,13 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Person.java
- *
- * Abstract base class containing information shared by people
- * in the system, including personal, address and contact details.
- * Applicant and Lecturer inherit from this class.
- */
+
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+
 @Entity
 @Table(name = "persons")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class  Person {
+public abstract class Person {
     @Id
     @Column(name = "person_id")
     private int personId;

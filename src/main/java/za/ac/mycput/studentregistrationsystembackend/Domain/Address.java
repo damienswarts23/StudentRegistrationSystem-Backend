@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Address.java
- *
- * Represents the address information associated with a person.
- * Stores the street, suburb, city, postal code and province.
- */
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

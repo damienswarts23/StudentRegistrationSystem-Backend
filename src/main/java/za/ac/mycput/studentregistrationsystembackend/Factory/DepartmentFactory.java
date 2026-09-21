@@ -1,8 +1,8 @@
 package za.ac.mycput.studentregistrationsystembackend.Factory;
 
 
-import za.ac.mycput.studentregistrationsystembackend.Util.Helper;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Department;
+import za.ac.mycput.studentregistrationsystembackend.Util.Helper;
 
 public class DepartmentFactory {
     public static Department createDepartment(int departmentId, String departmentCode, String departmentName){

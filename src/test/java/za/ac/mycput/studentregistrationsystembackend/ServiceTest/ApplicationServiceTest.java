@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import za.ac.mycput.studentregistrationsystembackend.Domain.*;
-import za.ac.mycput.studentregistrationsystembackend.Service.*;
+import za.ac.mycput.studentregistrationsystembackend.Service.ApplicantService;
+import za.ac.mycput.studentregistrationsystembackend.Service.ApplicationService;
+import za.ac.mycput.studentregistrationsystembackend.Service.CourseService;
+import za.ac.mycput.studentregistrationsystembackend.Service.DepartmentService;
 
 import java.time.LocalDate;
 import java.util.List;

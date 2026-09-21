@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Department.java
- *
- * Represents an academic department within the institution.
- * Courses and lecturers are associated with departments.
- */
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

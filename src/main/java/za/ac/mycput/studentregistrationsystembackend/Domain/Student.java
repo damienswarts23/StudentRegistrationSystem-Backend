@@ -1,11 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Student.java
- *
- * Represents a registered student created from an Applicant.
- * Stores the student's number, institutional email and
- * reference to the original applicant information.
- */
+
 
 import jakarta.persistence.*;
 

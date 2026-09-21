@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * ContactDetails.java
- *
- * Represents the contact information associated with a person.
- * Stores the person's email address and phone number.
- */
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

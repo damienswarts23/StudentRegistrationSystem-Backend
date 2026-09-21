@@ -2,7 +2,10 @@ package za.ac.mycput.studentregistrationsystembackend.Service;
 
 import org.springframework.stereotype.Service;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Course;
+import za.ac.mycput.studentregistrationsystembackend.Domain.Department;
+import za.ac.mycput.studentregistrationsystembackend.Factory.CourseFactory;
 import za.ac.mycput.studentregistrationsystembackend.Repository.CourseRepository;
+import za.ac.mycput.studentregistrationsystembackend.Repository.DepartmentRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,13 +14,23 @@ import java.util.Optional;
 public class CourseService {
 
     private final CourseRepository repository;
+    private final DepartmentRepository departmentRepository;
 
-    public CourseService(CourseRepository repository) {
+    public CourseService(CourseRepository repository,
+                         DepartmentRepository departmentRepository) {
         this.repository = repository;
+        this.departmentRepository = departmentRepository;
     }
 
     public Course create(Course course) {
-        return repository.save(course);
+        int courseId = repository.findFirstByOrderByCourseIdDesc()
+                .map(item -> item.getCourseId() + 1).orElse(1);
+        Department department = departmentRepository
+                .findById(course.getDepartment().getDepartmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+        Course generatedCourse = CourseFactory.createCourse(courseId,
+                course.getCourseCode(), course.getCourseName(), department);
+        return repository.save(generatedCourse);
     }
 
     public Course read(int courseId) {
@@ -42,4 +55,9 @@ public class CourseService {
     public List<Course> getAll() {
         return repository.findAll();
     }
+
+    public List<Course> getByDepartment(int departmentId) {
+        return repository.findByDepartment_DepartmentIdOrderByCourseIdAsc(departmentId);
+    }
 }
+

@@ -19,8 +19,12 @@ public class ApplicationController {
 
 
     @PostMapping
-    public Application create(@RequestBody Application application) {
-        return service.create(application);
+    public ResponseEntity<Application> create(@RequestBody Application application) {
+        try {
+            return ResponseEntity.ok(service.create(application));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 
@@ -74,5 +78,19 @@ public class ApplicationController {
     @GetMapping
     public List<Application> getAll() {
         return service.getAll();
+    }
+
+    @GetMapping("/applicant/{personId}")
+    public List<Application> getByApplicant(@PathVariable int personId) {
+        return service.getByApplicant(personId);
+    }
+
+    @GetMapping(value = "/result-text", produces = "text/plain")
+    public ResponseEntity<String> getResultText(@RequestParam String email) {
+        String result = service.getResultText(email);
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(result);
     }
 }

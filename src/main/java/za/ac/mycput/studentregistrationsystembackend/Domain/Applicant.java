@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Applicant.java
- *
- * Represents a person applying to study at the institution.
- * Extends Person and stores the applicant-specific identifier.
- */
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
