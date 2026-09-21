@@ -2,6 +2,7 @@ package za.ac.mycput.studentregistrationsystembackend.Service;
 
 import org.springframework.stereotype.Service;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Department;
+import za.ac.mycput.studentregistrationsystembackend.Factory.DepartmentFactory;
 import za.ac.mycput.studentregistrationsystembackend.Repository.DepartmentRepository;
 
 import java.util.List;
@@ -17,7 +18,12 @@ public class DepartmentService {
     }
 
     public Department create(Department department) {
-        return repository.save(department);
+        int departmentId = repository.findFirstByOrderByDepartmentIdDesc()
+                .map(item -> item.getDepartmentId() + 1).orElse(1);
+        Department generatedDepartment = DepartmentFactory.createDepartment(
+                departmentId, department.getDepartmentCode(),
+                department.getDepartmentName());
+        return repository.save(generatedDepartment);
     }
 
     public Department read(int departmentId) {

@@ -22,52 +22,55 @@ public class DepartmentController {
         return service.create(department);
     }
 
+    @PostMapping(value = "/create-text", produces = "text/plain")
+    public String createText(@RequestBody Department department) {
+        return departmentText(service.create(department));
+    }
+
     @GetMapping("/{departmentId}")
-    public ResponseEntity<Department> read(
-            @PathVariable int departmentId) {
-
+    public ResponseEntity<Department> read(@PathVariable int departmentId) {
         Department department = service.read(departmentId);
-
         if (department == null) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.ok(department);
     }
 
     @PutMapping("/{departmentId}")
-    public ResponseEntity<Department> update(
-            @PathVariable int departmentId,
-            @RequestBody Department department) {
-
+    public ResponseEntity<Department> update(@PathVariable int departmentId, @RequestBody Department department) {
         if (service.read(departmentId) == null) {
             return ResponseEntity.notFound().build();
         }
-
         if (department.getDepartmentId() != departmentId) {
             return ResponseEntity.badRequest().build();
         }
-
-        Department updated = service.update(department);
-
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(service.update(department));
     }
 
     @DeleteMapping("/{departmentId}")
-    public ResponseEntity<Void> delete(
-            @PathVariable int departmentId) {
-
-        boolean deleted = service.delete(departmentId);
-
-        if (!deleted) {
+    public ResponseEntity<Void> delete(@PathVariable int departmentId) {
+        if (!service.delete(departmentId)) {
             return ResponseEntity.notFound().build();
         }
-
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public List<Department> getAll() {
         return service.getAll();
+    }
+
+    @GetMapping(value = "/department-list", produces = "text/plain")
+    public String getDepartmentList() {
+        StringBuilder result = new StringBuilder();
+        for (Department department : service.getAll()) {
+            result.append(departmentText(department)).append("\n");
+        }
+        return result.toString();
+    }
+
+    private String departmentText(Department department) {
+        return department.getDepartmentId() + "|" + department.getDepartmentCode()
+                + "|" + department.getDepartmentName();
     }
 }

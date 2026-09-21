@@ -1,11 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Lecturer.java
- *
- * Represents a lecturer employed by the institution.
- * A lecturer belongs to a department and may teach multiple
- * classes belonging to courses within that department.
- */
+
 import jakarta.persistence.*;
 
 import java.time.LocalDate;

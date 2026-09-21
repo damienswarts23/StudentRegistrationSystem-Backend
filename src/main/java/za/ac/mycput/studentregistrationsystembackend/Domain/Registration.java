@@ -1,11 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Registration.java
- *
- * Represents the registration of a Student for a Class.
- * Students may only register for classes belonging to
- * the course for which they applied.
- */
+
 
 import jakarta.persistence.*;
 

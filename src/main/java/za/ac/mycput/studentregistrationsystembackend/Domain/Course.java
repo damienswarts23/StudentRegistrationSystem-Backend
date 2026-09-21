@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Course.java
- *
- * Represents a course offered by the institution.
- * Each course belongs to a specific academic department.
- */
+
 
 import jakarta.persistence.*;
 

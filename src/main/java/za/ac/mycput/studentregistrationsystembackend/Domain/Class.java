@@ -1,13 +1,12 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Class.java
- *
- * Represents a class belonging to a course.
- * Classes are created without lecturers and may later be
- * assigned to a lecturer from the same department.
- */
+
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "classes")
@@ -31,6 +30,14 @@ public class Class {
     @JoinColumn(name = "lecturer_person_id")
     private Lecturer lecturer;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "class_lecturers",
+            joinColumns = @JoinColumn(name = "class_id"),
+            inverseJoinColumns = @JoinColumn(name = "lecturer_person_id")
+    )
+    private List<Lecturer> lecturers = new ArrayList<>();
+
     protected Class() {
     }
 
@@ -40,6 +47,7 @@ public class Class {
         this.className = builder.className;
         this.course = builder.course;
         this.lecturer = builder.lecturer;
+        this.lecturers = new ArrayList<>(builder.lecturers);
     }
 
     @Override
@@ -49,7 +57,7 @@ public class Class {
                 ", classCode='" + classCode + '\'' +
                 ", className='" + className + '\'' +
                 ", course=" + course +
-                ", lecturer=" + lecturer +
+                ", lecturers=" + getLecturers() +
                 '}';
     }
 
@@ -59,6 +67,7 @@ public class Class {
         private String className;
         private Course course;
         private Lecturer lecturer;
+        private List<Lecturer> lecturers = new ArrayList<>();
 
         public Builder setClassId(int classId) {
             this.classId = classId;
@@ -80,8 +89,14 @@ public class Class {
             return this;
         }
 
+        /* Kept for compatibility with the original project/tests. */
         public Builder setLecturer(Lecturer lecturer) {
             this.lecturer = lecturer;
+            return this;
+        }
+
+        public Builder setLecturers(List<Lecturer> lecturers) {
+            this.lecturers = lecturers == null ? new ArrayList<>() : new ArrayList<>(lecturers);
             return this;
         }
 
@@ -106,7 +121,49 @@ public class Class {
         return course;
     }
 
+    /*
+     * Compatibility getter for older code that expected only one lecturer.
+     * It returns the first lecturer when one exists.
+     */
     public Lecturer getLecturer() {
-        return lecturer;
+        if (lecturer != null) {
+            return lecturer;
+        }
+        return lecturers.isEmpty() ? null : lecturers.get(0);
+    }
+
+    public List<Lecturer> getLecturers() {
+        Map<Integer, Lecturer> unique = new LinkedHashMap<>();
+        if (lecturer != null) {
+            unique.put(lecturer.getPersonId(), lecturer);
+        }
+        for (Lecturer item : lecturers) {
+            if (item != null) {
+                unique.put(item.getPersonId(), item);
+            }
+        }
+        return new ArrayList<>(unique.values());
+    }
+
+    public boolean hasLecturer(int lecturerPersonId) {
+        for (Lecturer item : getLecturers()) {
+            if (item.getPersonId() == lecturerPersonId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addLecturer(Lecturer lecturerToAdd) {
+        if (lecturerToAdd != null && !hasLecturer(lecturerToAdd.getPersonId())) {
+            lecturers.add(lecturerToAdd);
+        }
+    }
+
+    public void removeLecturer(int lecturerPersonId) {
+        if (lecturer != null && lecturer.getPersonId() == lecturerPersonId) {
+            lecturer = null;
+        }
+        lecturers.removeIf(item -> item != null && item.getPersonId() == lecturerPersonId);
     }
 }

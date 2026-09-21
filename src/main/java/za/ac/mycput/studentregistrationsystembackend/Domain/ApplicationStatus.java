@@ -1,7 +1,6 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
 
-public enum Gender {
-    MALE,
-    FEMALE,
-    OTHER
+public enum ApplicationStatus {
+    PENDING,
+    ACCEPTED
 }

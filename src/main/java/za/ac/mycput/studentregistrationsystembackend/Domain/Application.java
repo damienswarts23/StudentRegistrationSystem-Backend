@@ -1,10 +1,5 @@
 package za.ac.mycput.studentregistrationsystembackend.Domain;
-/*
- * Application.java
- *
- * Represents an application made by an Applicant for a Course.
- * Links the applicant to the course they applied to study.
- */
+
 import jakarta.persistence.*;
 
 @Entity
@@ -15,13 +10,17 @@ public class Application {
     @Column(name = "application_id")
     private int applicationId;
 
-    @OneToOne
-    @JoinColumn(name = "applicant_person_id", nullable = false, unique = true)
+    @ManyToOne
+    @JoinColumn(name = "applicant_person_id", nullable = false)
     private Applicant applicant;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_status", nullable = false)
+    private ApplicationStatus status;
 
     protected Application() {
     }
@@ -30,6 +29,7 @@ public class Application {
         this.applicationId = builder.applicationId;
         this.applicant = builder.applicant;
         this.course = builder.course;
+        this.status = builder.status;
     }
 
     @Override
@@ -38,6 +38,7 @@ public class Application {
                 "applicationId=" + applicationId +
                 ", applicant=" + applicant +
                 ", course=" + course +
+                ", status=" + status +
                 '}';
     }
 
@@ -45,6 +46,7 @@ public class Application {
         private int applicationId;
         private Applicant applicant;
         private Course course;
+        private ApplicationStatus status = ApplicationStatus.PENDING;
 
         public Builder setApplicationId(int applicationId) {
             this.applicationId = applicationId;
@@ -58,6 +60,11 @@ public class Application {
 
         public Builder setCourse(Course course) {
             this.course = course;
+            return this;
+        }
+
+        public Builder setStatus(ApplicationStatus status) {
+            this.status = status;
             return this;
         }
 
@@ -76,5 +83,13 @@ public class Application {
 
     public Course getCourse() {
         return course;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
     }
 }

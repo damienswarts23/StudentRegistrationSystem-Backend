@@ -71,7 +71,9 @@ public class StudentService {
         }
 
         Application application = applicationRepository
-                .findByApplicant(student.getApplicant())
+                .findFirstByApplicantAndStatus(
+                        student.getApplicant(),
+                        za.ac.mycput.studentregistrationsystembackend.Domain.ApplicationStatus.ACCEPTED)
                 .orElse(null);
 
         List<Class> registeredClasses =

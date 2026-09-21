@@ -3,9 +3,13 @@ package za.ac.mycput.studentregistrationsystembackend.Service;
 import org.springframework.stereotype.Service;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Class;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Lecturer;
+import za.ac.mycput.studentregistrationsystembackend.Factory.ClassFactory;
 import za.ac.mycput.studentregistrationsystembackend.Repository.ClassRepository;
+import za.ac.mycput.studentregistrationsystembackend.Repository.CourseRepository;
+import za.ac.mycput.studentregistrationsystembackend.Repository.DepartmentRepository;
 import za.ac.mycput.studentregistrationsystembackend.Repository.LecturerRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,24 +18,37 @@ public class ClassService {
 
     private final ClassRepository classRepository;
     private final LecturerRepository lecturerRepository;
+    private final CourseRepository courseRepository;
+    private final DepartmentRepository departmentRepository;
 
     public ClassService(
             ClassRepository classRepository,
-            LecturerRepository lecturerRepository) {
+            LecturerRepository lecturerRepository,
+            CourseRepository courseRepository,
+            DepartmentRepository departmentRepository) {
 
         this.classRepository = classRepository;
         this.lecturerRepository = lecturerRepository;
+        this.courseRepository = courseRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     public Class create(Class courseClass) {
 
-        if (courseClass.getLecturer() != null) {
+        if (!courseClass.getLecturers().isEmpty()) {
             throw new IllegalArgumentException(
-                    "A class must be created before a lecturer is assigned"
+                    "A class must be created before lecturers are assigned"
             );
         }
 
-        return classRepository.save(courseClass);
+        int classId = classRepository.findFirstByOrderByClassIdDesc()
+                .map(item -> item.getClassId() + 1).orElse(1);
+        za.ac.mycput.studentregistrationsystembackend.Domain.Course course =
+                courseRepository.findById(courseClass.getCourse().getCourseId())
+                        .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+        Class generatedClass = ClassFactory.createClass(classId,
+                courseClass.getClassCode(), courseClass.getClassName(), course);
+        return classRepository.save(generatedClass);
     }
 
     public Class read(int classId) {
@@ -52,17 +69,19 @@ public class ClassService {
                         )
                 );
 
+        za.ac.mycput.studentregistrationsystembackend.Domain.Course course =
+                courseRepository.findById(courseClass.getCourse().getCourseId())
+                        .orElseThrow(() -> new IllegalArgumentException("Course not found"));
+
         Class updatedClass = new Class.Builder()
                 .setClassId(existingClass.getClassId())
                 .setClassCode(courseClass.getClassCode())
                 .setClassName(courseClass.getClassName())
-                .setCourse(courseClass.getCourse())
-                .setLecturer(existingClass.getLecturer())
+                .setCourse(course)
+                .setLecturers(existingClass.getLecturers())
                 .build();
 
-        if (updatedClass.getLecturer() != null) {
-            validateLecturerDepartment(updatedClass);
-        }
+        validateLecturerDepartments(updatedClass);
 
         return classRepository.save(updatedClass);
     }
@@ -92,10 +111,15 @@ public class ClassService {
             return null;
         }
 
-        return classRepository
-                .findByCourse_DepartmentAndLecturerIsNull(
-                        lecturer.getDepartment()
-                );
+        List<Class> result = new ArrayList<>();
+        int departmentId = lecturer.getDepartment().getDepartmentId();
+        for (Class courseClass : classRepository.findAll()) {
+            if (courseClass.getCourse().getDepartment().getDepartmentId() == departmentId
+                    && !courseClass.hasLecturer(lecturerPersonId)) {
+                result.add(courseClass);
+            }
+        }
+        return result;
     }
 
     public Class assignLecturer(
@@ -118,10 +142,8 @@ public class ClassService {
                         )
                 );
 
-        if (courseClass.getLecturer() != null) {
-            throw new IllegalArgumentException(
-                    "Class already has a lecturer"
-            );
+        if (courseClass.hasLecturer(lecturerPersonId)) {
+            return courseClass;
         }
 
         int classDepartmentId =
@@ -142,37 +164,54 @@ public class ClassService {
             );
         }
 
-        Class updatedClass = new Class.Builder()
-                .setClassId(courseClass.getClassId())
-                .setClassCode(courseClass.getClassCode())
-                .setClassName(courseClass.getClassName())
-                .setCourse(courseClass.getCourse())
-                .setLecturer(lecturer)
-                .build();
-
-        return classRepository.save(updatedClass);
+        courseClass.addLecturer(lecturer);
+        return classRepository.save(courseClass);
     }
 
-    private void validateLecturerDepartment(
-            Class courseClass) {
 
-        int classDepartmentId =
-                courseClass
-                        .getCourse()
-                        .getDepartment()
-                        .getDepartmentId();
+    public Class unassignLecturer(int classId, int lecturerPersonId) {
 
-        int lecturerDepartmentId =
-                courseClass
-                        .getLecturer()
-                        .getDepartment()
-                        .getDepartmentId();
+        Class courseClass = classRepository
+                .findById(classId)
+                .orElseThrow(() -> new IllegalArgumentException("Class not found"));
 
-        if (classDepartmentId != lecturerDepartmentId) {
+        if (!courseClass.hasLecturer(lecturerPersonId)) {
+            return courseClass;
+        }
 
-            throw new IllegalArgumentException(
-                    "Lecturer can only teach classes in their department"
-            );
+        courseClass.removeLecturer(lecturerPersonId);
+        return classRepository.save(courseClass);
+    }
+
+    /*
+     * With the many-to-many rule every class in the department is available
+     * for another lecturer too, even if another lecturer already teaches it.
+     */
+    public List<Class> getAvailableClassesForDepartment(int departmentId) {
+        if (!departmentRepository.existsById(departmentId)) {
+            return List.of();
+        }
+        List<Class> result = new ArrayList<>();
+        for (Class courseClass : classRepository.findAll()) {
+            if (courseClass.getCourse().getDepartment().getDepartmentId() == departmentId) {
+                result.add(courseClass);
+            }
+        }
+        return result;
+    }
+
+    public List<Class> getByCourse(int courseId) {
+        return classRepository.findByCourse_CourseIdOrderByClassIdAsc(courseId);
+    }
+
+    private void validateLecturerDepartments(Class courseClass) {
+        int classDepartmentId = courseClass.getCourse().getDepartment().getDepartmentId();
+        for (Lecturer lecturer : courseClass.getLecturers()) {
+            if (lecturer.getDepartment().getDepartmentId() != classDepartmentId) {
+                throw new IllegalArgumentException(
+                        "Lecturer can only teach classes in their department"
+                );
+            }
         }
     }
 }
