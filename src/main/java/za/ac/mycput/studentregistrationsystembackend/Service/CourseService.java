@@ -1,11 +1,10 @@
 package za.ac.mycput.studentregistrationsystembackend.Service;
 
 import org.springframework.stereotype.Service;
-import za.ac.mycput.studentregistrationsystembackend.Domain.Course;
-import za.ac.mycput.studentregistrationsystembackend.Domain.Department;
+import org.springframework.transaction.annotation.Transactional;
+import za.ac.mycput.studentregistrationsystembackend.Domain.*;
 import za.ac.mycput.studentregistrationsystembackend.Factory.CourseFactory;
-import za.ac.mycput.studentregistrationsystembackend.Repository.CourseRepository;
-import za.ac.mycput.studentregistrationsystembackend.Repository.DepartmentRepository;
+import za.ac.mycput.studentregistrationsystembackend.Repository.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,11 +14,20 @@ public class CourseService {
 
     private final CourseRepository repository;
     private final DepartmentRepository departmentRepository;
+    private final ClassRepository classRepository;
+    private final ApplicationRepository applicationRepository;
+    private final StudentRepository studentRepository;
 
     public CourseService(CourseRepository repository,
-                         DepartmentRepository departmentRepository) {
+                         DepartmentRepository departmentRepository,
+                         ClassRepository classRepository,
+                         ApplicationRepository applicationRepository,
+                         StudentRepository studentRepository) {
         this.repository = repository;
         this.departmentRepository = departmentRepository;
+        this.classRepository = classRepository;
+        this.applicationRepository = applicationRepository;
+        this.studentRepository = studentRepository;
     }
 
     public Course create(Course course) {
@@ -42,13 +50,44 @@ public class CourseService {
         return repository.save(course);
     }
 
+    @Transactional
     public boolean delete(int courseId) {
 
         if (!repository.existsById(courseId)) {
             return false;
         }
 
+        if (!classRepository.findByCourse_CourseIdOrderByClassIdAsc(courseId).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Course cannot be deleted while it still has classes. Delete the classes first.");
+        }
+
+        List<Application> applications =
+                applicationRepository.findByCourse_CourseIdOrderByApplicationIdAsc(courseId);
+
+        for (Application application : applications) {
+            if (application.getStatus() == ApplicationStatus.ACCEPTED) {
+                Student student = studentRepository.findByApplicant(application.getApplicant()).orElse(null);
+                if (student != null) {
+                    throw new IllegalArgumentException(
+                            "Course cannot be deleted because student "
+                                    + student.getStudentNumber()
+                                    + " has an accepted application for this course. "
+                                    + "Delete that student first, then try deleting the course again.");
+                }
+                throw new IllegalArgumentException(
+                        "Course cannot be deleted while it has an accepted application.");
+            }
+        }
+
+        // Pending applications must no longer point to a course that is being removed.
+        if (!applications.isEmpty()) {
+            applicationRepository.deleteAll(applications);
+            applicationRepository.flush();
+        }
+
         repository.deleteById(courseId);
+        repository.flush();
         return true;
     }
 

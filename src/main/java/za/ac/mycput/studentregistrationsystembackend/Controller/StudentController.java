@@ -2,10 +2,10 @@ package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import za.ac.mycput.studentregistrationsystembackend.Domain.Applicant;
-import za.ac.mycput.studentregistrationsystembackend.Domain.Student;
+import za.ac.mycput.studentregistrationsystembackend.Domain.*;
 import za.ac.mycput.studentregistrationsystembackend.Service.StudentService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -97,6 +97,47 @@ public class StudentController {
         }
     }
 
+    @PutMapping(value = "/{studentId}/admin-details", produces = "text/plain")
+    public ResponseEntity<String> updateDetailsAsAdmin(
+            @PathVariable int studentId,
+            @RequestParam String firstName,
+            @RequestParam String lastName,
+            @RequestParam String dateOfBirth,
+            @RequestParam String gender,
+            @RequestParam String race,
+            @RequestParam String personalEmail,
+            @RequestParam String phoneNumber,
+            @RequestParam String street,
+            @RequestParam String suburb,
+            @RequestParam String city,
+            @RequestParam String postalCode,
+            @RequestParam String province) {
+
+        try {
+            Applicant updated = service.updatePersonalDetailsAsAdmin(
+                    studentId,
+                    firstName.trim(),
+                    lastName.trim(),
+                    LocalDate.parse(dateOfBirth.trim()),
+                    Gender.valueOf(gender.trim().toUpperCase()),
+                    Race.valueOf(race.trim().toUpperCase()),
+                    personalEmail.trim(),
+                    phoneNumber.trim(),
+                    street.trim(),
+                    suburb.trim(),
+                    city.trim(),
+                    postalCode.trim(),
+                    province.trim());
+
+            if (updated == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(studentText(service.read(studentId)));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+    }
+
     @GetMapping("/{studentId}/details")
     public ResponseEntity<Map<String, Object>> getStudentDetails(@PathVariable int studentId) {
         Map<String, Object> details = service.getStudentDetails(studentId);
@@ -106,9 +147,43 @@ public class StudentController {
         return ResponseEntity.ok(details);
     }
 
+    @GetMapping(value = "/student-list", produces = "text/plain")
+    public String getStudentList() {
+        StringBuilder result = new StringBuilder();
+        for (Student student : service.getAll()) {
+            result.append(studentText(student)).append("\n");
+        }
+        return result.toString();
+    }
+
     @GetMapping
     public List<Student> getAll() {
         return service.getAll();
+    }
+
+    private String studentText(Student student) {
+        Applicant applicant = student.getApplicant();
+        Application accepted = service.getAcceptedApplication(student.getStudentId());
+        String courseName = accepted == null || accepted.getCourse() == null
+                ? "" : accepted.getCourse().getCourseName();
+        return student.getStudentId() + "|"
+                + safe(student.getStudentNumber()) + "|"
+                + safe(student.getStudentEmail()) + "|"
+                + applicant.getPersonId() + "|"
+                + applicant.getApplicantId() + "|"
+                + safe(applicant.getFirstName()) + "|"
+                + safe(applicant.getLastName()) + "|"
+                + applicant.getDateOfBirth() + "|"
+                + applicant.getGender() + "|"
+                + applicant.getRace() + "|"
+                + safe(applicant.getContactDetails().getEmail()) + "|"
+                + safe(applicant.getContactDetails().getPhoneNumber()) + "|"
+                + safe(applicant.getAddress().getStreet()) + "|"
+                + safe(applicant.getAddress().getSuburb()) + "|"
+                + safe(applicant.getAddress().getCity()) + "|"
+                + safe(applicant.getAddress().getPostalCode()) + "|"
+                + safe(applicant.getAddress().getProvince()) + "|"
+                + safe(courseName);
     }
 
     private String personalDetailsText(Applicant applicant) {

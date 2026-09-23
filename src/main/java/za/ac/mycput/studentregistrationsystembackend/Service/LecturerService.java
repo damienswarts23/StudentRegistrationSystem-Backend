@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Address;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Class;
 import za.ac.mycput.studentregistrationsystembackend.Domain.ContactDetails;
@@ -88,6 +89,7 @@ public class LecturerService {
         return repository.save(updated);
     }
 
+    @Transactional
     public boolean delete(int personId) {
 
         if (!repository.existsById(personId)) {

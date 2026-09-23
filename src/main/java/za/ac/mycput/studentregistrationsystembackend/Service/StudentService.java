@@ -10,6 +10,7 @@ import za.ac.mycput.studentregistrationsystembackend.Repository.ApplicationRepos
 import za.ac.mycput.studentregistrationsystembackend.Repository.RegistrationRepository;
 import za.ac.mycput.studentregistrationsystembackend.Repository.StudentRepository;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +49,28 @@ public class StudentService {
         return repository.save(student);
     }
 
+    @Transactional
     public boolean delete(int studentId) {
-        if (!repository.existsById(studentId)) {
+        Student student = repository.findById(studentId).orElse(null);
+        if (student == null) {
             return false;
         }
-        repository.deleteById(studentId);
+
+        registrationRepository.deleteAll(registrationRepository.findByStudent(student));
+        registrationRepository.flush();
+
+        // A deleted student must not leave accepted/pending application rows behind
+        // that keep courses locked by a foreign-key reference.
+        List<Application> applications =
+                applicationRepository.findByApplicantOrderByApplicationIdAsc(student.getApplicant());
+
+        repository.delete(student);
+        repository.flush();
+
+        if (!applications.isEmpty()) {
+            applicationRepository.deleteAll(applications);
+            applicationRepository.flush();
+        }
         return true;
     }
 
@@ -105,6 +123,65 @@ public class StudentService {
                 current.getRace());
 
         return applicantRepository.save(updatedApplicant);
+    }
+
+    @Transactional
+    public Applicant updatePersonalDetailsAsAdmin(
+            int studentId,
+            String firstName,
+            String lastName,
+            LocalDate dateOfBirth,
+            Gender gender,
+            Race race,
+            String personalEmail,
+            String phoneNumber,
+            String street,
+            String suburb,
+            String city,
+            String postalCode,
+            String province) {
+
+        Student student = read(studentId);
+        if (student == null) {
+            return null;
+        }
+
+        Applicant current = student.getApplicant();
+        Address currentAddress = current.getAddress();
+        ContactDetails currentContact = current.getContactDetails();
+
+        Address updatedAddress = new Address(
+                currentAddress.getAddressId(),
+                street, suburb, city, postalCode, province);
+
+        ContactDetails updatedContact = new ContactDetails(
+                currentContact.getContactId(),
+                personalEmail, phoneNumber);
+
+        Applicant updatedApplicant = ApplicantFactory.createApplicant(
+                current.getApplicantId(),
+                current.getPersonId(),
+                firstName,
+                lastName,
+                dateOfBirth,
+                gender,
+                updatedContact,
+                updatedAddress,
+                race);
+
+        return applicantRepository.save(updatedApplicant);
+    }
+
+    public Application getAcceptedApplication(int studentId) {
+        Student student = read(studentId);
+        if (student == null) {
+            return null;
+        }
+        return applicationRepository
+                .findFirstByApplicantAndStatus(
+                        student.getApplicant(),
+                        za.ac.mycput.studentregistrationsystembackend.Domain.ApplicationStatus.ACCEPTED)
+                .orElse(null);
     }
 
     public Map<String, Object> getStudentDetails(int studentId) {

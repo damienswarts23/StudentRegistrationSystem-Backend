@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Class;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Lecturer;
 import za.ac.mycput.studentregistrationsystembackend.Factory.ClassFactory;
-import za.ac.mycput.studentregistrationsystembackend.Repository.ClassRepository;
-import za.ac.mycput.studentregistrationsystembackend.Repository.CourseRepository;
-import za.ac.mycput.studentregistrationsystembackend.Repository.DepartmentRepository;
-import za.ac.mycput.studentregistrationsystembackend.Repository.LecturerRepository;
+import za.ac.mycput.studentregistrationsystembackend.Repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +17,20 @@ public class ClassService {
     private final LecturerRepository lecturerRepository;
     private final CourseRepository courseRepository;
     private final DepartmentRepository departmentRepository;
+    private final RegistrationRepository registrationRepository;
 
     public ClassService(
             ClassRepository classRepository,
             LecturerRepository lecturerRepository,
             CourseRepository courseRepository,
-            DepartmentRepository departmentRepository) {
+            DepartmentRepository departmentRepository,
+            RegistrationRepository registrationRepository) {
 
         this.classRepository = classRepository;
         this.lecturerRepository = lecturerRepository;
         this.courseRepository = courseRepository;
         this.departmentRepository = departmentRepository;
+        this.registrationRepository = registrationRepository;
     }
 
     public Class create(Class courseClass) {
@@ -88,10 +88,20 @@ public class ClassService {
 
     public boolean delete(int classId) {
 
-        if (!classRepository.existsById(classId)) {
+        Class courseClass = classRepository.findById(classId).orElse(null);
+        if (courseClass == null) {
             return false;
         }
 
+        // A class is the lowest level in the department hierarchy.
+        // Remove student registrations first so the class can be deleted cleanly.
+        registrationRepository.deleteAll(registrationRepository.findByCourseClass_ClassId(classId));
+
+        // Remove many-to-many lecturer links before deleting the class record.
+        for (Lecturer lecturer : new ArrayList<>(courseClass.getLecturers())) {
+            courseClass.removeLecturer(lecturer.getPersonId());
+        }
+        classRepository.save(courseClass);
         classRepository.deleteById(classId);
         return true;
     }

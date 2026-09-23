@@ -48,11 +48,15 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{departmentId}")
-    public ResponseEntity<Void> delete(@PathVariable int departmentId) {
-        if (!service.delete(departmentId)) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> delete(@PathVariable int departmentId) {
+        try {
+            if (!service.delete(departmentId)) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
         }
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
