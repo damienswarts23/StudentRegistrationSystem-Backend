@@ -12,6 +12,7 @@ public interface ApplicationRepository
         extends JpaRepository<Application, Integer> {
 
     List<Application> findByApplicantOrderByApplicationIdAsc(Applicant applicant);
+    List<Application> findByCourse_CourseIdOrderByApplicationIdAsc(int courseId);
     Optional<Application> findFirstByApplicantAndStatus(Applicant applicant, ApplicationStatus status);
     Optional<Application> findFirstByOrderByApplicationIdDesc();
 }

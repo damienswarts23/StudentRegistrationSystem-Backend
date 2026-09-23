@@ -10,5 +10,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Inte
     java.util.Optional<Registration> findFirstByOrderByRegistrationIdDesc();
     List<Registration> findByStudent(Student student);
     List<Registration> findByCourseClass_ClassCodeOrderByRegistrationIdAsc(String classCode);
+    List<Registration> findByCourseClass_ClassId(int classId);
     boolean existsByStudent_StudentIdAndCourseClass_ClassId(int studentId, int classId);
 }

@@ -52,11 +52,15 @@ public class CourseController {
     }
 
     @DeleteMapping("/{courseId}")
-    public ResponseEntity<Void> delete(@PathVariable int courseId) {
-        if (!service.delete(courseId)) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<?> delete(@PathVariable int courseId) {
+        try {
+            if (!service.delete(courseId)) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
         }
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
