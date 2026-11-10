@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.*;
 import za.ac.mycput.studentregistrationsystembackend.Service.StudentService;
@@ -10,13 +11,16 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/students")
 public class StudentController {
 
     private final StudentService service;
+    private final za.ac.mycput.studentregistrationsystembackend.Service.StudentAccountService accounts;
 
-    public StudentController(StudentService service) {
+    public StudentController(StudentService service, za.ac.mycput.studentregistrationsystembackend.Service.StudentAccountService accounts) {
         this.service = service;
+        this.accounts = accounts;
     }
 
     @PostMapping
@@ -24,7 +28,20 @@ public class StudentController {
         return service.create(student);
     }
 
+    @PostMapping(value="/{studentId}/login-account",produces="text/plain")
+    @PreAuthorize("@accountAccess.canActivateStudent(#studentId)")
+    public String enableLogin(@PathVariable int studentId,@RequestParam String password) {
+        return accounts.enable(studentId,password);
+    }
+
+    @PostMapping(value="/{studentId}/reset-login-password",produces="text/plain")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String resetLogin(@PathVariable int studentId,@RequestParam String password) {
+        return accounts.reset(studentId,password);
+    }
+
     @GetMapping("/{studentId}")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public ResponseEntity<Student> read(@PathVariable int studentId) {
         Student student = service.read(studentId);
         if (student == null) {
@@ -58,6 +75,7 @@ public class StudentController {
     }
 
     @GetMapping(value = "/{studentId}/personal-details-text", produces = "text/plain")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public ResponseEntity<String> getPersonalDetailsText(@PathVariable int studentId) {
         Applicant applicant = service.getPersonalDetails(studentId);
         if (applicant == null) {
@@ -67,6 +85,7 @@ public class StudentController {
     }
 
     @PutMapping(value = "/{studentId}/personal-details", produces = "text/plain")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public ResponseEntity<String> updatePersonalDetails(
             @PathVariable int studentId,
             @RequestParam String personalEmail,
@@ -139,6 +158,7 @@ public class StudentController {
     }
 
     @GetMapping("/{studentId}/details")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public ResponseEntity<Map<String, Object>> getStudentDetails(@PathVariable int studentId) {
         Map<String, Object> details = service.getStudentDetails(studentId);
         if (details == null) {

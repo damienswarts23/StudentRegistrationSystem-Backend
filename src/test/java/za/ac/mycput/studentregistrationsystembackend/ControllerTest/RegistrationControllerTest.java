@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -240,7 +241,7 @@ class RegistrationControllerTest {
                         .setCourseClass(courseClass)
                         .build();
 
-        mockMvc.perform(post("/api/registrations")
+        mockMvc.perform(post("/api/registrations").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registration)))
                 .andExpect(status().isOk())
@@ -284,7 +285,7 @@ class RegistrationControllerTest {
 
         registrationService.create(registration);
 
-        mockMvc.perform(get("/api/registrations/2"))
+        mockMvc.perform(get("/api/registrations/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.registrationId").value(2))
                 .andExpect(jsonPath("$.student.studentId").value(2))
@@ -334,7 +335,7 @@ class RegistrationControllerTest {
                         .setCourseClass(class2)
                         .build();
 
-        mockMvc.perform(put("/api/registrations/3")
+        mockMvc.perform(put("/api/registrations/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedRegistration)))
                 .andExpect(status().isOk())
@@ -377,10 +378,10 @@ class RegistrationControllerTest {
 
         registrationService.create(registration);
 
-        mockMvc.perform(delete("/api/registrations/4"))
+        mockMvc.perform(delete("/api/registrations/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/registrations/4"))
+        mockMvc.perform(get("/api/registrations/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -427,7 +428,7 @@ class RegistrationControllerTest {
                         .build()
         );
 
-        mockMvc.perform(get("/api/registrations"))
+        mockMvc.perform(get("/api/registrations").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath(
@@ -479,7 +480,7 @@ class RegistrationControllerTest {
                         .setCourseClass(wrongClass)
                         .build();
 
-        mockMvc.perform(post("/api/registrations")
+        mockMvc.perform(post("/api/registrations").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registration)))
                 .andExpect(status().isBadRequest());

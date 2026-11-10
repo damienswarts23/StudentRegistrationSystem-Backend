@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Applicant;
 import za.ac.mycput.studentregistrationsystembackend.Service.ApplicantService;
@@ -8,6 +9,7 @@ import za.ac.mycput.studentregistrationsystembackend.Service.ApplicantService;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/applicants")
 public class ApplicantController {
 
@@ -19,8 +21,12 @@ public class ApplicantController {
 
 
     @PostMapping
-    public Applicant create(@RequestBody Applicant applicant) {
-        return service.create(applicant);
+    @PreAuthorize("permitAll()")
+    public Applicant create(@RequestBody Applicant applicant, jakarta.servlet.http.HttpSession session) {
+        Applicant saved = service.create(applicant);
+        session.setAttribute("newApplicantId", saved.getPersonId());
+        session.setAttribute("newApplicantEmail", saved.getContactDetails().getEmail());
+        return saved;
     }
 
 

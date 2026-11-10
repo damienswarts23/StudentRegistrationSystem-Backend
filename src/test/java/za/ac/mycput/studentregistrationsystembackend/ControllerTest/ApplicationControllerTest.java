@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -127,7 +128,7 @@ class ApplicationControllerTest {
                 .setCourse(course)
                 .build();
 
-        mockMvc.perform(post("/api/applications")
+        mockMvc.perform(post("/api/applications").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(application)))
                 .andExpect(status().isOk())
@@ -161,7 +162,7 @@ class ApplicationControllerTest {
 
         applicationService.create(application);
 
-        mockMvc.perform(get("/api/applications/2"))
+        mockMvc.perform(get("/api/applications/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.applicationId").value(2))
                 .andExpect(jsonPath("$.applicant.applicantId")
@@ -201,7 +202,7 @@ class ApplicationControllerTest {
                         .setCourse(course2)
                         .build();
 
-        mockMvc.perform(put("/api/applications/3")
+        mockMvc.perform(put("/api/applications/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedApplication)))
                 .andExpect(status().isOk())
@@ -232,10 +233,10 @@ class ApplicationControllerTest {
 
         applicationService.create(application);
 
-        mockMvc.perform(delete("/api/applications/4"))
+        mockMvc.perform(delete("/api/applications/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/applications/4"))
+        mockMvc.perform(get("/api/applications/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -270,7 +271,7 @@ class ApplicationControllerTest {
         applicationService.create(application1);
         applicationService.create(application2);
 
-        mockMvc.perform(get("/api/applications"))
+        mockMvc.perform(get("/api/applications").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath(

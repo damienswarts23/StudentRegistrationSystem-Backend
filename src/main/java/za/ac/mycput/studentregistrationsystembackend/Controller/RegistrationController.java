@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Registration;
 import za.ac.mycput.studentregistrationsystembackend.Service.RegistrationService;
@@ -8,6 +9,7 @@ import za.ac.mycput.studentregistrationsystembackend.Service.RegistrationService
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/registrations")
 public class RegistrationController {
 
@@ -27,6 +29,7 @@ public class RegistrationController {
     }
 
     @PostMapping(value = "/student/{studentId}/class/{classId}", produces = "text/plain")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public ResponseEntity<String> registerClass(@PathVariable int studentId, @PathVariable int classId) {
         try {
             return ResponseEntity.ok(registrationText(service.create(studentId, classId)));
@@ -61,6 +64,7 @@ public class RegistrationController {
     }
 
     @DeleteMapping("/{registrationId}")
+    @PreAuthorize("@accountAccess.registration(#registrationId)")
     public ResponseEntity<Void> delete(@PathVariable int registrationId) {
         if (!service.delete(registrationId)) {
             return ResponseEntity.notFound().build();
@@ -74,6 +78,7 @@ public class RegistrationController {
     }
 
     @GetMapping(value = "/student/{studentId}/registration-list", produces = "text/plain")
+    @PreAuthorize("@accountAccess.student(#studentId)")
     public String getStudentRegistrations(@PathVariable int studentId) {
         StringBuilder result = new StringBuilder();
         for (Registration registration : service.getForStudent(studentId)) {
@@ -83,6 +88,7 @@ public class RegistrationController {
     }
 
     @GetMapping(value = "/class-code/{classCode}/student-list", produces = "text/plain")
+    @PreAuthorize("@accountAccess.classStudents(#classCode)")
     public String getStudentsForClass(@PathVariable String classCode) {
         StringBuilder result = new StringBuilder();
         for (Registration registration : service.getForClassCode(classCode)) {

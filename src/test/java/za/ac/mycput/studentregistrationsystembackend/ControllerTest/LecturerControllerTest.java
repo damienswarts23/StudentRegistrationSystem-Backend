@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -89,16 +90,16 @@ class LecturerControllerTest {
         Lecturer lecturer =
                 createLecturer(1, 2001, department);
 
-        mockMvc.perform(post("/api/lecturers")
+        mockMvc.perform(post("/api/lecturers").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(lecturer)))
+                        .content(objectMapper.writeValueAsString(java.util.Map.of("lecturer", lecturer, "initialPassword", "Lecturer@2026!"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personId").value(1))
-                .andExpect(jsonPath("$.lecturerId").value(2001))
+                .andExpect(jsonPath("$.lecturerId").value(1))
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Smith"))
                 .andExpect(jsonPath("$.employeeNumber")
-                        .value("EMP2001"))
+                        .value("LEC001"))
                 .andExpect(jsonPath("$.department.departmentId")
                         .value(1));
     }
@@ -120,7 +121,7 @@ class LecturerControllerTest {
 
         lecturerService.create(lecturer);
 
-        mockMvc.perform(get("/api/lecturers/2"))
+        mockMvc.perform(get("/api/lecturers/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personId").value(2))
                 .andExpect(jsonPath("$.lecturerId").value(2002))
@@ -162,7 +163,7 @@ class LecturerControllerTest {
                 .setDepartment(department)
                 .build();
 
-        mockMvc.perform(put("/api/lecturers/3")
+        mockMvc.perform(put("/api/lecturers/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedLecturer)))
                 .andExpect(status().isOk())
@@ -189,10 +190,10 @@ class LecturerControllerTest {
 
         lecturerService.create(lecturer);
 
-        mockMvc.perform(delete("/api/lecturers/4"))
+        mockMvc.perform(delete("/api/lecturers/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/lecturers/4"))
+        mockMvc.perform(get("/api/lecturers/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -217,7 +218,7 @@ class LecturerControllerTest {
         lecturerService.create(lecturer1);
         lecturerService.create(lecturer2);
 
-        mockMvc.perform(get("/api/lecturers"))
+        mockMvc.perform(get("/api/lecturers").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath(
