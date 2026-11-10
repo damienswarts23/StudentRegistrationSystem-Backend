@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Application;
 import za.ac.mycput.studentregistrationsystembackend.Service.ApplicationService;
@@ -8,17 +9,21 @@ import za.ac.mycput.studentregistrationsystembackend.Service.ApplicationService;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/applications")
 public class ApplicationController {
 
     private final ApplicationService service;
+    private final za.ac.mycput.studentregistrationsystembackend.Security.AccountAccess access;
 
-    public ApplicationController(ApplicationService service) {
+    public ApplicationController(ApplicationService service, za.ac.mycput.studentregistrationsystembackend.Security.AccountAccess access) {
         this.service = service;
+        this.access = access;
     }
 
 
     @PostMapping
+    @PreAuthorize("@accountAccess.application(#application)")
     public ResponseEntity<Application> create(@RequestBody Application application) {
         try {
             return ResponseEntity.ok(service.create(application));
@@ -86,8 +91,11 @@ public class ApplicationController {
     }
 
     @GetMapping(value = "/result-text", produces = "text/plain")
+    @PreAuthorize("@accountAccess.result(#email)")
     public ResponseEntity<String> getResultText(@RequestParam String email) {
-        String result = service.getResultText(email);
+        Integer personId = access.resultPersonId();
+        String result = access.admin() ? service.getResultText(email)
+                : personId == null ? null : service.getResultTextForApplicant(personId);
         if (result == null) {
             return ResponseEntity.notFound().build();
         }

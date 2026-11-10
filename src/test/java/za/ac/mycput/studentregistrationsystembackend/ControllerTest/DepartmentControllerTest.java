@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -40,7 +41,7 @@ class DepartmentControllerTest {
                 .setDepartmentName("Information and Communication Technology")
                 .build();
 
-        mockMvc.perform(post("/api/departments")
+        mockMvc.perform(post("/api/departments").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(department)))
                 .andExpect(status().isOk())
@@ -62,7 +63,7 @@ class DepartmentControllerTest {
 
         departmentService.create(department);
 
-        mockMvc.perform(get("/api/departments/2"))
+        mockMvc.perform(get("/api/departments/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.departmentId").value(2))
                 .andExpect(jsonPath("$.departmentCode").value("BUS"))
@@ -87,7 +88,7 @@ class DepartmentControllerTest {
                 .setDepartmentName("Engineering and Technology")
                 .build();
 
-        mockMvc.perform(put("/api/departments/3")
+        mockMvc.perform(put("/api/departments/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedDepartment)))
                 .andExpect(status().isOk())
@@ -108,10 +109,10 @@ class DepartmentControllerTest {
 
         departmentService.create(department);
 
-        mockMvc.perform(delete("/api/departments/4"))
+        mockMvc.perform(delete("/api/departments/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/departments/4"))
+        mockMvc.perform(get("/api/departments/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -134,7 +135,7 @@ class DepartmentControllerTest {
         departmentService.create(department1);
         departmentService.create(department2);
 
-        mockMvc.perform(get("/api/departments"))
+        mockMvc.perform(get("/api/departments").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(2));

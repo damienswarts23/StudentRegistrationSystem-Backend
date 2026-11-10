@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Class;
 import za.ac.mycput.studentregistrationsystembackend.Service.ClassService;
@@ -8,6 +9,7 @@ import za.ac.mycput.studentregistrationsystembackend.Service.ClassService;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/classes")
 public class ClassController {
 
@@ -120,6 +122,7 @@ public class ClassController {
     }
 
     @GetMapping(value = "/course/{courseId}/class-list", produces = "text/plain")
+    @PreAuthorize("permitAll()")
     public String getClassesForCourse(@PathVariable int courseId) {
         StringBuilder result = new StringBuilder();
         for (Class courseClass : service.getByCourse(courseId)) {

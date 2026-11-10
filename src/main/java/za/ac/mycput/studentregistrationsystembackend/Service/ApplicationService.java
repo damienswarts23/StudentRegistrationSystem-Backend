@@ -111,6 +111,12 @@ public class ApplicationService {
             return null;
         }
 
+        return getResultTextForApplicant(applicant.getPersonId());
+    }
+
+    public String getResultTextForApplicant(int personId) {
+        Applicant applicant = applicantRepository.findById(personId).orElse(null);
+        if (applicant == null) return null;
         StringBuilder result = new StringBuilder();
         result.append("APPLICANT|").append(applicant.getFirstName()).append("|")
                 .append(applicant.getLastName()).append("|")

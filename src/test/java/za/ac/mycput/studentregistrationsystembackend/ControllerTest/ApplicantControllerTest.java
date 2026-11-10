@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -68,7 +69,7 @@ class ApplicantControllerTest {
 
         Applicant applicant = createApplicant(1, 1001);
 
-        mockMvc.perform(post("/api/applicants")
+        mockMvc.perform(post("/api/applicants").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(applicant)))
                 .andExpect(status().isOk())
@@ -89,7 +90,7 @@ class ApplicantControllerTest {
 
         applicantService.create(applicant);
 
-        mockMvc.perform(get("/api/applicants/2"))
+        mockMvc.perform(get("/api/applicants/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.personId").value(2))
                 .andExpect(jsonPath("$.applicantId").value(1002))
@@ -117,7 +118,7 @@ class ApplicantControllerTest {
                 .setRace(Race.COLOURED)
                 .build();
 
-        mockMvc.perform(put("/api/applicants/3")
+        mockMvc.perform(put("/api/applicants/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedApplicant)))
                 .andExpect(status().isOk())
@@ -135,10 +136,10 @@ class ApplicantControllerTest {
 
         applicantService.create(applicant);
 
-        mockMvc.perform(delete("/api/applicants/4"))
+        mockMvc.perform(delete("/api/applicants/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/applicants/4"))
+        mockMvc.perform(get("/api/applicants/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -152,7 +153,7 @@ class ApplicantControllerTest {
         applicantService.create(applicant1);
         applicantService.create(applicant2);
 
-        mockMvc.perform(get("/api/applicants"))
+        mockMvc.perform(get("/api/applicants").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[?(@.personId == 5)]").exists())

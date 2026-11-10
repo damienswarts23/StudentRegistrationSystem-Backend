@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Lecturer;
 import za.ac.mycput.studentregistrationsystembackend.Service.LecturerService;
@@ -9,27 +10,48 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/lecturers")
 public class LecturerController {
 
     private final LecturerService service;
+    private final za.ac.mycput.studentregistrationsystembackend.Service.LecturerAccountService accounts;
+    public record CreateLecturerRequest(Lecturer lecturer, String initialPassword) {}
 
     public LecturerController(
-            LecturerService service) {
+            LecturerService service, za.ac.mycput.studentregistrationsystembackend.Service.LecturerAccountService accounts) {
 
         this.service = service;
+        this.accounts = accounts;
     }
 
     @PostMapping
     public Lecturer create(
-            @RequestBody Lecturer lecturer) {
+            @RequestBody CreateLecturerRequest request) {
 
-        return service.create(lecturer);
+        return accounts.create(request.lecturer(), request.initialPassword());
     }
 
     @PostMapping(value = "/create-text", produces = "text/plain")
-    public String createText(@RequestBody Lecturer lecturer) {
-        return lecturerText(service.create(lecturer));
+    public String createText(@RequestBody CreateLecturerRequest request) {
+        return lecturerText(accounts.create(request.lecturer(), request.initialPassword()));
+    }
+
+    @PostMapping(value="/{personId}/login-account",produces="text/plain")
+    public String enableLogin(@PathVariable int personId,@RequestParam String password) {
+        return accounts.enable(personId,password);
+    }
+
+    @PutMapping(value="/me/personal-details",produces="text/plain")
+    @PreAuthorize("hasRole('LECTURER')")
+    public String updateOwnDetails(java.security.Principal principal,
+        @RequestParam String personalEmail,@RequestParam String phoneNumber,
+        @RequestParam String street,@RequestParam String suburb,@RequestParam String city,
+        @RequestParam String postalCode,@RequestParam String province) {
+        Lecturer current=service.findByEmail(principal.getName());
+        if(current==null)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Lecturer record unavailable.");
+        return lecturerText(service.updatePersonalDetails(current.getPersonId(),current.getLastName(),personalEmail,
+            phoneNumber,street,suburb,city,postalCode,province));
     }
 
     @GetMapping("/{personId}")
@@ -109,6 +131,7 @@ public class LecturerController {
     }
 
     @GetMapping("/{personId}/details")
+    @PreAuthorize("@accountAccess.lecturer(#personId)")
     public ResponseEntity<Map<String, Object>>
     getLecturerDetails(
             @PathVariable int personId) {
@@ -131,6 +154,7 @@ public class LecturerController {
     }
 
     @GetMapping(value = "/email", produces = "text/plain")
+    @PreAuthorize("@accountAccess.lecturerEmail(#email)")
     public ResponseEntity<String> getByEmail(@RequestParam String email) {
         Lecturer lecturer = service.findByEmail(email);
         if (lecturer == null) {
@@ -149,6 +173,7 @@ public class LecturerController {
     }
 
     @GetMapping(value = "/{personId}/classes-text", produces = "text/plain")
+    @PreAuthorize("@accountAccess.lecturer(#personId)")
     public ResponseEntity<String> getLecturerClassesText(@PathVariable int personId) {
         Map<String, Object> details = service.getLecturerDetails(personId);
         if (details == null) {

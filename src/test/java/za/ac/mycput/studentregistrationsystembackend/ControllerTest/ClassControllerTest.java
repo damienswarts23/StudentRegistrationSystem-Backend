@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@org.springframework.security.test.context.support.WithMockUser(username="admin@cput.ac.za",roles="ADMIN")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -133,7 +134,7 @@ class ClassControllerTest {
                 .setCourse(course)
                 .build();
 
-        mockMvc.perform(post("/api/classes")
+        mockMvc.perform(post("/api/classes").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(courseClass)))
                 .andExpect(status().isOk())
@@ -167,7 +168,7 @@ class ClassControllerTest {
 
         classService.create(courseClass);
 
-        mockMvc.perform(get("/api/classes/2"))
+        mockMvc.perform(get("/api/classes/2").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.classId").value(2))
                 .andExpect(jsonPath("$.classCode")
@@ -206,7 +207,7 @@ class ClassControllerTest {
                 .setCourse(course)
                 .build();
 
-        mockMvc.perform(put("/api/classes/3")
+        mockMvc.perform(put("/api/classes/3").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedClass)))
                 .andExpect(status().isOk())
@@ -235,10 +236,10 @@ class ClassControllerTest {
 
         classService.create(courseClass);
 
-        mockMvc.perform(delete("/api/classes/4"))
+        mockMvc.perform(delete("/api/classes/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/classes/4"))
+        mockMvc.perform(get("/api/classes/4").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -270,7 +271,7 @@ class ClassControllerTest {
         classService.create(class1);
         classService.create(class2);
 
-        mockMvc.perform(get("/api/classes"))
+        mockMvc.perform(get("/api/classes").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath(
@@ -308,7 +309,7 @@ class ClassControllerTest {
                 );
 
         mockMvc.perform(
-                        put("/api/classes/7/lecturer/10")
+                        put("/api/classes/7/lecturer/10").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.classId")
@@ -358,7 +359,7 @@ class ClassControllerTest {
                 );
 
         mockMvc.perform(
-                        put("/api/classes/8/lecturer/11")
+                        put("/api/classes/8/lecturer/11").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf())
                 )
                 .andExpect(status().isBadRequest());
     }

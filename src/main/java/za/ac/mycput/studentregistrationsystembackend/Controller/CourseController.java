@@ -1,6 +1,7 @@
 package za.ac.mycput.studentregistrationsystembackend.Controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import za.ac.mycput.studentregistrationsystembackend.Domain.Course;
 import za.ac.mycput.studentregistrationsystembackend.Service.CourseService;
@@ -8,6 +9,7 @@ import za.ac.mycput.studentregistrationsystembackend.Service.CourseService;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/courses")
 public class CourseController {
 
@@ -69,11 +71,13 @@ public class CourseController {
     }
 
     @GetMapping(value = "/course-list", produces = "text/plain")
+    @PreAuthorize("permitAll()")
     public String getCourseList() {
         return courseListText(service.getAll());
     }
 
     @GetMapping(value = "/department/{departmentId}/course-list", produces = "text/plain")
+    @PreAuthorize("permitAll()")
     public String getCoursesForDepartment(@PathVariable int departmentId) {
         return courseListText(service.getByDepartment(departmentId));
     }
