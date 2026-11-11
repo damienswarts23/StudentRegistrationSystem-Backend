@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface LecturerRepository extends JpaRepository<Lecturer, Integer> {
     Optional<Lecturer> findByLecturerEmailIgnoreCase(String lecturerEmail);
+
     Optional<Lecturer> findFirstByOrderByLecturerIdDesc();
 }
