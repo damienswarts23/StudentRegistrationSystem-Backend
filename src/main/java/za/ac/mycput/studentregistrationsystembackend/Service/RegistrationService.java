@@ -101,7 +101,7 @@ public class RegistrationService {
     }
 
     private void validateRegistration(Student student,
-            za.ac.mycput.studentregistrationsystembackend.Domain.Class courseClass) {
+                                      za.ac.mycput.studentregistrationsystembackend.Domain.Class courseClass) {
         Application application = applicationRepository
                 .findFirstByApplicantAndStatus(student.getApplicant(),
                         za.ac.mycput.studentregistrationsystembackend.Domain.ApplicationStatus.ACCEPTED)

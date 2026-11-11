@@ -76,8 +76,8 @@ public class LecturerService {
     }
 
     public Lecturer updatePersonalDetails(int personId, String lastName, String personalEmail,
-            String phoneNumber, String street, String suburb, String city,
-            String postalCode, String province) {
+                                          String phoneNumber, String street, String suburb, String city,
+                                          String postalCode, String province) {
         Lecturer existing = repository.findById(personId)
                 .orElseThrow(() -> new IllegalArgumentException("Lecturer not found"));
         Address address = new Address(personId, street, suburb, city, postalCode, province);
@@ -148,6 +148,7 @@ public class LecturerService {
 
         return details;
     }
+
     private String buildLecturerEmail(String firstName, String lastName, int lecturerId) {
         String first = firstName == null ? "" : firstName.replaceAll("[^A-Za-z]", "").toLowerCase();
         String last = lastName == null ? "" : lastName.replaceAll("[^A-Za-z]", "").toLowerCase();
