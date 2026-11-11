@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface ApplicantRepository extends JpaRepository<Applicant, Integer> {
     Optional<Applicant> findByContactDetails_EmailIgnoreCase(String email);
+
     Optional<Applicant> findFirstByOrderByApplicantIdDesc();
 }
