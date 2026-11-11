@@ -28,16 +28,16 @@ public class StudentController {
         return service.create(student);
     }
 
-    @PostMapping(value="/{studentId}/login-account",produces="text/plain")
+    @PostMapping(value = "/{studentId}/login-account", produces = "text/plain")
     @PreAuthorize("@accountAccess.canActivateStudent(#studentId)")
-    public String enableLogin(@PathVariable int studentId,@RequestParam String password) {
-        return accounts.enable(studentId,password);
+    public String enableLogin(@PathVariable int studentId, @RequestParam String password) {
+        return accounts.enable(studentId, password);
     }
 
-    @PostMapping(value="/{studentId}/reset-login-password",produces="text/plain")
+    @PostMapping(value = "/{studentId}/reset-login-password", produces = "text/plain")
     @PreAuthorize("hasRole('ADMIN')")
-    public String resetLogin(@PathVariable int studentId,@RequestParam String password) {
-        return accounts.reset(studentId,password);
+    public String resetLogin(@PathVariable int studentId, @RequestParam String password) {
+        return accounts.reset(studentId, password);
     }
 
     @GetMapping("/{studentId}")

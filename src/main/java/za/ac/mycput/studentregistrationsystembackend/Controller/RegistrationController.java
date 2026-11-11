@@ -49,7 +49,7 @@ public class RegistrationController {
 
     @PutMapping("/{registrationId}")
     public ResponseEntity<Registration> update(@PathVariable int registrationId,
-            @RequestBody Registration registration) {
+                                               @RequestBody Registration registration) {
         if (service.read(registrationId) == null) {
             return ResponseEntity.notFound().build();
         }
