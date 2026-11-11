@@ -61,7 +61,7 @@ public class Class {
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int classId;
         private String classCode;
         private String className;
@@ -100,7 +100,7 @@ public class Class {
             return this;
         }
 
-        public Class build(){
+        public Class build() {
             return new Class(this);
         }
     }
