@@ -13,7 +13,7 @@ public class Department {
     @Column(name = "department_id")
     private int departmentId;
 
-    @Column(name = "department_code",nullable = false, unique = true)
+    @Column(name = "department_code", nullable = false, unique = true)
     private String departmentCode;
 
     @Column(name = "department_name", nullable = false)
@@ -39,7 +39,7 @@ public class Department {
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int departmentId;
         private String departmentCode;
         private String departmentName;
@@ -60,7 +60,7 @@ public class Department {
             return this;
         }
 
-        public Department build(){
+        public Department build() {
             return new Department(this);
         }
     }
