@@ -42,7 +42,7 @@ public class Application {
                 '}';
     }
 
-    public  static class Builder {
+    public static class Builder {
         private int applicationId;
         private Applicant applicant;
         private Course course;
@@ -68,7 +68,7 @@ public class Application {
             return this;
         }
 
-        public Application build(){
+        public Application build() {
             return new Application(this);
         }
     }

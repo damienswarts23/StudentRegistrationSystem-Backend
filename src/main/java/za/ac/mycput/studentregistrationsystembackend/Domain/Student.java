@@ -41,7 +41,7 @@ public class Student {
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int studentId;
         private String studentNumber;
         private String studentEmail;
@@ -67,7 +67,7 @@ public class Student {
             return this;
         }
 
-        public Student build(){
+        public Student build() {
             return new Student(this);
         }
     }

@@ -29,7 +29,7 @@ public class Course {
         this.courseId = builder.courseId;
         this.courseCode = builder.courseCode;
         this.courseName = builder.courseName;
-        this.department= builder.department;
+        this.department = builder.department;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Course {
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int courseId;
         private String courseCode;
         private String courseName;
@@ -68,7 +68,7 @@ public class Course {
             return this;
         }
 
-        public Course build(){
+        public Course build() {
             return new Course(this);
         }
     }

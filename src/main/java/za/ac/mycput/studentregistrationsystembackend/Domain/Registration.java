@@ -38,7 +38,7 @@ public class Registration {
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int registrationId;
         private Student student;
         private Class courseClass;
@@ -59,7 +59,7 @@ public class Registration {
             return this;
         }
 
-        public Registration build(){
+        public Registration build() {
             return new Registration(this);
         }
     }
