@@ -6,9 +6,9 @@ import za.ac.mycput.studentregistrationsystembackend.Domain.Student;
 import za.ac.mycput.studentregistrationsystembackend.Util.Helper;
 
 public class RegistrationFactory {
-    public static Registration createRegistration(int registrationId, Student student, Class classs){
+    public static Registration createRegistration(int registrationId, Student student, Class classs) {
         if (!Helper.isValidId(registrationId) || Helper.isNull(student)
-        || Helper.isNull(classs)){
+                || Helper.isNull(classs)) {
             throw new IllegalArgumentException("Enter valid deatails");
         }
 

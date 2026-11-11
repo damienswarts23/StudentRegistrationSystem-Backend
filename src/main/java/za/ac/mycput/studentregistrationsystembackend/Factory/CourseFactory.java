@@ -5,9 +5,9 @@ import za.ac.mycput.studentregistrationsystembackend.Domain.Department;
 import za.ac.mycput.studentregistrationsystembackend.Util.Helper;
 
 public class CourseFactory {
-    public static Course createCourse(int courseId, String courseCode, String courseName, Department department){
-        if(!Helper.isValidId(courseId) || Helper.isNullOrEmpty(courseCode)
-         || Helper.isNullOrEmpty(courseName) || Helper.isNull(department)){
+    public static Course createCourse(int courseId, String courseCode, String courseName, Department department) {
+        if (!Helper.isValidId(courseId) || Helper.isNullOrEmpty(courseCode)
+                || Helper.isNullOrEmpty(courseName) || Helper.isNull(department)) {
             throw new IllegalArgumentException("Enter valid course details");
         }
 

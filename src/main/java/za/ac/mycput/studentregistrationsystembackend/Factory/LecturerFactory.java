@@ -8,14 +8,14 @@ import java.time.LocalDate;
 public class LecturerFactory {
     public static Lecturer createLecturer(int lecturerId, String employeeNumber, String lecturerEmail,
                                           int personId, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                                          ContactDetails contactDetails, Address address, Race race, Department department){
+                                          ContactDetails contactDetails, Address address, Race race, Department department) {
 
-        if (!Helper.isValidId(lecturerId)|| !Helper.isValidId(personId)
-        || Helper.isNullOrEmpty(employeeNumber) || Helper.isNullOrEmpty(lecturerEmail)
-        || Helper.isNullOrEmpty(firstName) || Helper.isNullOrEmpty(lastName)
-        || Helper.isNull(dateOfBirth) ||  Helper.isNull(gender)
-        || Helper.isNull(contactDetails) || Helper.isNull(address)
-        || Helper.isNull(race)|| Helper.isNull(department)){
+        if (!Helper.isValidId(lecturerId) || !Helper.isValidId(personId)
+                || Helper.isNullOrEmpty(employeeNumber) || Helper.isNullOrEmpty(lecturerEmail)
+                || Helper.isNullOrEmpty(firstName) || Helper.isNullOrEmpty(lastName)
+                || Helper.isNull(dateOfBirth) || Helper.isNull(gender)
+                || Helper.isNull(contactDetails) || Helper.isNull(address)
+                || Helper.isNull(race) || Helper.isNull(department)) {
             throw new IllegalArgumentException("Enter Valid information");
         }
 
