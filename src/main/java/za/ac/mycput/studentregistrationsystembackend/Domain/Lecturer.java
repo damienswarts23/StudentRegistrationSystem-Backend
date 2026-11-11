@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "lecturers")
 @PrimaryKeyJoinColumn(name = "person_id")
-public class Lecturer extends Person{
+public class Lecturer extends Person {
 
     @Column(name = "lecturer_id", nullable = false, unique = true)
     private int lecturerId;
@@ -15,7 +15,7 @@ public class Lecturer extends Person{
     @Column(name = "employee_number", nullable = false, unique = true)
     private String employeeNumber;
 
-    @Column(name = "lecturer_email", nullable = false,unique = true)
+    @Column(name = "lecturer_email", nullable = false, unique = true)
     private String lecturerEmail;
 
     @ManyToOne
@@ -43,7 +43,7 @@ public class Lecturer extends Person{
                 '}';
     }
 
-    public static class Builder{
+    public static class Builder {
         private int personId;
         private String firstName;
         private String lastName;
@@ -117,7 +117,7 @@ public class Lecturer extends Person{
             return this;
         }
 
-        public Lecturer build(){
+        public Lecturer build() {
             return new Lecturer(this);
         }
     }
