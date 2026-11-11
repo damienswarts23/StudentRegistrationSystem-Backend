@@ -46,7 +46,7 @@ public class DepartmentService {
         if (repository.countCourses(departmentId) > 0 || repository.countLecturers(departmentId) > 0) {
             throw new IllegalArgumentException(
                     "Department cannot be deleted while it still has courses or lecturers. "
-                    + "Delete the courses and lecturers first.");
+                            + "Delete the courses and lecturers first.");
         }
 
         repository.deleteById(departmentId);
