@@ -16,7 +16,9 @@ public class LecturerController {
 
     private final LecturerService service;
     private final za.ac.mycput.studentregistrationsystembackend.Service.LecturerAccountService accounts;
-    public record CreateLecturerRequest(Lecturer lecturer, String initialPassword) {}
+
+    public record CreateLecturerRequest(Lecturer lecturer, String initialPassword) {
+    }
 
     public LecturerController(
             LecturerService service, za.ac.mycput.studentregistrationsystembackend.Service.LecturerAccountService accounts) {
@@ -37,21 +39,22 @@ public class LecturerController {
         return lecturerText(accounts.create(request.lecturer(), request.initialPassword()));
     }
 
-    @PostMapping(value="/{personId}/login-account",produces="text/plain")
-    public String enableLogin(@PathVariable int personId,@RequestParam String password) {
-        return accounts.enable(personId,password);
+    @PostMapping(value = "/{personId}/login-account", produces = "text/plain")
+    public String enableLogin(@PathVariable int personId, @RequestParam String password) {
+        return accounts.enable(personId, password);
     }
 
-    @PutMapping(value="/me/personal-details",produces="text/plain")
+    @PutMapping(value = "/me/personal-details", produces = "text/plain")
     @PreAuthorize("hasRole('LECTURER')")
     public String updateOwnDetails(java.security.Principal principal,
-        @RequestParam String personalEmail,@RequestParam String phoneNumber,
-        @RequestParam String street,@RequestParam String suburb,@RequestParam String city,
-        @RequestParam String postalCode,@RequestParam String province) {
-        Lecturer current=service.findByEmail(principal.getName());
-        if(current==null)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Lecturer record unavailable.");
-        return lecturerText(service.updatePersonalDetails(current.getPersonId(),current.getLastName(),personalEmail,
-            phoneNumber,street,suburb,city,postalCode,province));
+                                   @RequestParam String personalEmail, @RequestParam String phoneNumber,
+                                   @RequestParam String street, @RequestParam String suburb, @RequestParam String city,
+                                   @RequestParam String postalCode, @RequestParam String province) {
+        Lecturer current = service.findByEmail(principal.getName());
+        if (current == null)
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Lecturer record unavailable.");
+        return lecturerText(service.updatePersonalDetails(current.getPersonId(), current.getLastName(), personalEmail,
+                phoneNumber, street, suburb, city, postalCode, province));
     }
 
     @GetMapping("/{personId}")
